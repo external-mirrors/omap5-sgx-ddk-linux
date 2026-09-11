@@ -123,6 +123,10 @@ static inline void pvr_vm_flags_clear(struct vm_area_struct *vma,
 #define pvr_vm_flags_clear vm_flags_clear
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)) */
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 17, 0))
+typedef unsigned long pfn_t;
+#endif
+
 /* WARNING:
  * The mmap code has its own mutex, to prevent a possible deadlock,
  * when using gPVRSRVLock.
