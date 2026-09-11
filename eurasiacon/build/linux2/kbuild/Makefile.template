@@ -68,13 +68,16 @@ else
 .SECONDARY:
 endif
 
+define symlink-source-file
+@if [ ! -e $(dir $@) ]; then mkdir -p $(dir $@); fi
+@if [ ! -h $@ ]; then ln -sf $< $@; fi
+endef
+
 $(OUT)/$(TARGET_PRIMARY_ARCH)/kbuild/external/%.c: $(EXTRA_KBUILD_SOURCE)/%.c
-	@if [ ! -e $(dir $@) ]; then mkdir -p $(dir $@); fi
-	@if [ ! -h $@ ]; then ln -sf $< $@; fi
+	$(symlink-source-file)
 
 $(OUT)/$(TARGET_PRIMARY_ARCH)/kbuild/%.c: $(TOP)/%.c
-	@if [ ! -e $(dir $@) ]; then mkdir -p $(dir $@); fi
-	@if [ ! -h $@ ]; then ln -sf $< $@; fi
+	$(symlink-source-file)
 
 ccflags-y += -D__linux__ -include $(OUT)/config_kernel.h \
  -I$(OUT)/include \
