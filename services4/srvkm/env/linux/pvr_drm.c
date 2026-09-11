@@ -551,7 +551,9 @@ static struct drm_driver sPVRDrmDriver =
 	.fops = &sPVRFileOps,
 	.name = "pvr",
 	.desc = PVR_DRM_DESC,
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0))
 	.date = PVR_DRM_DATE,
+#endif
 	.major = PVRVERSION_MAJ,
 	.minor = PVRVERSION_MIN,
 	.patchlevel = PVRVERSION_BUILD,
