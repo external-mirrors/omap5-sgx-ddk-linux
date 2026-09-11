@@ -97,6 +97,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "pvr_linux_fence.h"
 #endif
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 16, 0))
+#define timer_container_of from_timer
+#endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(6, 16, 0)) */
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0))
+#define timer_delete_sync del_timer_sync
+#endif
+
 #define ON_EACH_CPU(func, info, wait) on_each_cpu(func, info, wait)
 
 #if defined(PVR_LINUX_USING_WORKQUEUES) && !defined(CONFIG_PREEMPTION) && !defined(CONFIG_PREEMPT_VOLUNTARY)
@@ -2732,7 +2740,7 @@ static void OSTimerCallbackBody(TIMER_CALLBACK_DATA *psTimerCBData)
 */ /**************************************************************************/
 static void OSTimerCallbackWrapper(struct timer_list *psTimer)
 {
-	TIMER_CALLBACK_DATA *psTimerCBData = from_timer(psTimerCBData, psTimer, sTimer);
+	TIMER_CALLBACK_DATA *psTimerCBData = timer_container_of(psTimerCBData, psTimer, sTimer);
 
 #if defined(PVR_LINUX_TIMERS_USING_WORKQUEUES) || defined(PVR_LINUX_TIMERS_USING_SHARED_WORKQUEUE)
     int res;
@@ -2943,7 +2951,7 @@ PVRSRV_ERROR OSDisableTimer (IMG_HANDLE hTimer)
 #endif
 
     /* remove timer */
-    del_timer_sync(&psTimerCBData->sTimer);	
+    timer_delete_sync(&psTimerCBData->sTimer);
     
 #if defined(PVR_LINUX_TIMERS_USING_WORKQUEUES)
     /*
