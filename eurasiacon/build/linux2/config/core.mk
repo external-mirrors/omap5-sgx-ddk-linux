@@ -135,28 +135,6 @@ ifeq ($(filter $(need),$(firstword $(sort $(MAKE_VERSION) $(need)))),)
 $(error A version of GNU make >= $(need) is required - this is version $(MAKE_VERSION))
 endif
 
-# Try to guess EURASIAROOT if it wasn't set. Check this location.
-#
-_GUESSED_EURASIAROOT := $(abspath ../../../..)
-ifneq ($(strip $(EURASIAROOT)),)
-# We don't want to warn about EURASIAROOT if it's empty: this might mean that
-# it's not set at all anywhere, but it could also mean that it's set like
-# "export EURASIAROOT=" or "make EURASIAROOT= sometarget". If it is set but
-# empty, we'll act as if it's unset and not warn.
-ifneq ($(strip $(EURASIAROOT)),$(_GUESSED_EURASIAROOT))
-nothing :=
-space := $(nothing) $(nothing)
-$(warning EURASIAROOT is set (via: $(origin EURASIAROOT)), but its value does not)
-$(warning match the root of this source tree, so it is being ignored)
-$(warning EURASIAROOT is set to: $(EURASIAROOT))
-$(warning $(space)The detected root is: $(_GUESSED_EURASIAROOT))
-$(warning To suppress this message, unset EURASIAROOT or set it empty)
-endif
-# else, EURASIAROOT matched the actual root of the source tree: don't warn
-endif
-override EURASIAROOT := $(_GUESSED_EURASIAROOT)
-TOP := $(EURASIAROOT)
-
 ifneq ($(words $(TOP)),1)
 $(warning This source tree is located in a path which contains whitespace,)
 $(warning which is not supported.)
@@ -767,7 +745,7 @@ endif
 .PHONY: autogen
 autogen:
 ifeq ($(INTERNAL_CLOBBER_ONLY),)
-	@$(MAKE) -s --no-print-directory -C $(EURASIAROOT) \
+	@$(MAKE) -s --no-print-directory -C $(TOP) \
 		-f eurasiacon/build/linux2/prepare_tree.mk \
 		LDM_PCI=$(LDM_PCI) LDM_PLATFORM=$(LDM_PLATFORM)
 else
