@@ -73,11 +73,23 @@ define symlink-source-file
 @if [ ! -h $@ ]; then ln -sf $< $@; fi
 endef
 
+# This checks if we're building against a newer (Linux 6.13+) headers/source
+# tree. Instead of running make commands from headers/source tree, the newer
+# kernel build infrastructure changes to the path provided by the M= argument,
+# meaning that during kbuild, the current working directory will be:
+# $(OUT)/$(TARGET_PRIMARY_PATH)/kbuild.
+# If, after removing $(OUT), we're at this location, it means the new kbuild
+# infrastructure. This is using a consequence of the new infrastructure, but
+# prevents having to do kernel version checks with external shell.
+ifeq ($(subst $(OUT)/,,$(CURDIR)),$(TARGET_PRIMARY_ARCH)/kbuild)
+vpath %.c $(TOP)
+else
 $(OUT)/$(TARGET_PRIMARY_ARCH)/kbuild/external/%.c: $(EXTRA_KBUILD_SOURCE)/%.c
 	$(symlink-source-file)
 
 $(OUT)/$(TARGET_PRIMARY_ARCH)/kbuild/%.c: $(TOP)/%.c
 	$(symlink-source-file)
+endif
 
 ccflags-y += -D__linux__ -include $(OUT)/config_kernel.h \
  -I$(OUT)/include \
